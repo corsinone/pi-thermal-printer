@@ -101,10 +101,9 @@ This should open a console, where we can type any character on the serial.
 By typing anything, the printer should start printing each typed character.
 If you press the key btn:[ENTER], it should escape to a new line.
 
+Then, press `CTRL` + `]` to quit.
+
 == Script
 
 Now, thanks to `python3-serial`, we can create python scripts that open the serial `/dev/serial0` and send characters to it.
 Examples are provided in the directory `python` within this repository.
-
-
-Then, press `CTRL` + `]` to quit.
