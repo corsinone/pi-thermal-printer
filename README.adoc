@@ -1,0 +1,110 @@
+= Thermal printer
+:author: Gianluca Corsini
+:date: Dec. 25 2024
+:toc: preamble
+
+== Introduction
+
+This repository contains instructions on how to use a thermal printer connected to your Raspberry, and send characters to it through Python scripts.
+
+== Repository content
+
+boot:: Contains some configuration files that are stored in the Raspberry within either the directory `/boot/firmware` or `/boot`. Here, they are provided as backup (and the related files are denoted by the extension `.bkp`) or as example.
+python:: Contains examples of Python scripts to send characters to the thermal printer.
+setup:: Contains setup material, such as configuration scripts.
+
+== Setup
+
+=== Raspberry 4
+
+First, it is necessary to configure the Raspberry device.
+
+==== Install OS
+
+You need to install an OS on your Raspberry.
+These steps have been tested with Octoprint and Raspbian, while others may work and thus result in similar steps.
+
+==== Configuration
+
+Once the OS is installed, connect to it by SSH; usually the username is `pi` and the password `raspberry`, if not customized.
+
+TIP: On Windows, you can use link:https://www.putty.org/[PuTTY] to connect through ssh to your raspberry (which should be connected to the same network as your PC).
+
+Once logged in, open a terminal and follow these steps.
+
+* Type `sudo raspi-config`
+* Then go to `Interface Options` and press the key btn:[ENTER] on your keyboard.
+** Then to `Serial Port`.
+** The message `Would you like a login shell to be accessible over serial?` should appear.
+** Move the cursors on the button btn:[<No>] with the arrow keys of your keyboard, and press the key btn:[ENTER]. 
+** Next, at the question `Would you like the serial port hardware to be enabled?` confirm on the button btn:[<Yes>].
+** Now, you should get the following message +
+====
+ The serial login shell is disabled
+ The serial interface is enabled
+====
++ Press on the button btn:[<Ok>].
+** Lastly, at the question whether to reboot the device, confirm with the button btn:[<Yes>].
+* Wait for the Raspberry to reboot, then log in back through ssh (in the meantime you should have logged out).
+* Navigate to the directory: `cd /boot/firmware` if Raspbian. Otherwise, in Octoprint, `cd /boot`..
+* Locate the files `cmdline.txt` and `config.txt` by typing `ls *.txt`.
+* Create a backup for those files by simply typing the following commands:
+
+[source, bash]
+----
+sudo cp /boot/cmdline.txt /boot/cmdline.txt.bkp
+sudo cp /boot/config.txt /boot/config.txt.bkp
+----
+
+* Make sure that `enable_uart=1` is uncommented in `config.txt`. To check that, you can type: `cat config.txt | grep uart`.
+* Then, edit the file `cmdline.txt` by replacing the following line +
+`console=serial0,115200 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait` +
+with +
+`dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles` +
+
+IMPORTANT: Make sure to avoid replacing the value of `root`, since it may differ case to case.
+
+Once done these steps, you should be able to use the serial on the GPIO 13 and 14, which are mapped to the system file `/dev/serial0`.
+The latter (i.e., `/dev/serial0`) will be the name of the serial port to be used in Python.
+
+=== System packages
+
+Lets install the necessary system and python packages.
+
+First of all, lets update all the system packages; it is not necessary but it is good practice to keep the system updated.
+Therefore, in a terminal, run `sudo apt update && sudo apt upgrade -y`.
+Then, lets install `git`, which may come handy. Thus, type `sudo apt install -y git`.
+Lastly, we need `python3` and the package `python3-serial`: the former will install the python interpreter, while the latter allows using any serial in python. So, we run `sudo apt install -y python3 python3-serial`.
+
+TIP: Otherwise, you can install all the necessary packages by running the shell script install_dependencies.sh, by typing
+
+[source, bash]
+----
+sudo chmod +x install_dependencies.sh
+sudo ./install_dependencies.sh
+----
+
+Once done these steps, it should be possible to send and receive bytes over the serial by using a python script.
+
+== Test
+
+To test it, we can use `pyserial-miniterm`, which comes installed with `python3-serial`.
+
+Therefore, in a terminal, type
+
+[source, bash]
+----
+`pyserial-miniterm /dev/serial0 9600`
+----
+
+This should open a console, where we can type any character on the serial.
+By typing anything, the printer should start printing each typed character.
+If you press the key btn:[ENTER], it should escape to a new line.
+
+== Script
+
+Now, thanks to `python3-serial`, we can create python scripts that open the serial `/dev/serial0` and send characters to it.
+Examples are provided in the directory `python` within this repository.
+
+
+Then, press `CTRL` + `]` to quit.
