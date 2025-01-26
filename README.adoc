@@ -15,18 +15,16 @@ setup:: Contains setup material, such as configuration scripts.
 
 == Setup
 
-=== Raspberry 4
-
 First, it is necessary to configure the Raspberry device.
 
-==== Install OS
+=== Install OS
 
 You need to install an OS on your Raspberry.
 These steps have been tested with Octoprint and Raspbian, while others may work and thus result in similar steps.
 
-==== Configuration
+=== Configuration
 
-Once the OS is installed, connect to it by SSH; usually the username is `pi` and the password `raspberry`, if not customized.
+Once the OS is installed, connect to your raspberry by SSH. Usually, the username is `pi` and the password `raspberry`, if not modified during the installation process.
 
 TIP: On Windows, you can use link:https://www.putty.org/[PuTTY] to connect through ssh to your raspberry (which should be connected to the same network as your PC).
 
@@ -38,34 +36,55 @@ Once logged in, open a terminal and follow these steps.
 ** The message `Would you like a login shell to be accessible over serial?` should appear.
 ** Move the cursors on the button btn:[<No>] with the arrow keys of your keyboard, and press the key btn:[ENTER]. 
 ** Next, at the question `Would you like the serial port hardware to be enabled?` confirm on the button btn:[<Yes>].
-** Now, you should get the following message +
+** Now, you should get the following message:
+
 ====
  The serial login shell is disabled
  The serial interface is enabled
 ====
-+ Press on the button btn:[<Ok>].
-** Lastly, at the question whether to reboot the device, confirm with the button btn:[<Yes>].
-* Wait for the Raspberry to reboot, then log in back through ssh (in the meantime you should have logged out).
-* Navigate to the directory: `cd /boot/firmware` if Raspbian. Otherwise, in Octoprint, `cd /boot`..
+
+** Press on the button btn:[<Ok>].
+** Lastly, at the question whether to reboot or not the device, confirm with the button btn:[<Yes>].
+* Wait for the Raspberry to reboot, then log in back through SSH (in the meantime you should have logged out).
+* Navigate to the directory `/boot/firmware` if Raspbian, otherwise, if Octoprint `/boot`. To do that, simply type
+
+[source, bash]
+----
+$ cd /boot/firmware # if Raspbian. Otherwise, in Octoprint, type $ cd /boot
+----
+
 * Locate the files `cmdline.txt` and `config.txt` by typing `ls *.txt`.
 * Create a backup for those files by simply typing the following commands:
 
 [source, bash]
 ----
-sudo cp /boot/cmdline.txt /boot/cmdline.txt.bkp
-sudo cp /boot/config.txt /boot/config.txt.bkp
+$ sudo cp /boot/cmdline.txt /boot/cmdline.txt.bkp
+$ sudo cp /boot/config.txt /boot/config.txt.bkp
 ----
 
-* Make sure that `enable_uart=1` is uncommented in `config.txt`. To check that, you can type: `cat config.txt | grep uart`.
-* Then, edit the file `cmdline.txt` by replacing the following line +
-`console=serial0,115200 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait` +
-with +
-`dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles` +
+* Make sure that `enable_uart=1` is uncommented in `config.txt`. To check that, you can type: `cat config.txt | grep uart`. To be uncommented, the line should start with the character `#`.
+** If this is not the case, you need to modify that line. 
+*** To do that, type `nano config.txt`.
+*** Navigate to that line with the arrow keys and add the character `#` at its beginning.
+*** Press the keys btn:[<CTRL>]+btn:[<X>] on your keyboard and press btn:[<ENTER>].
+* Then, edit the file `cmdline.txt` by replacing the following line
+`console=serial0,115200 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait` with `dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles` +
 
-IMPORTANT: Make sure to avoid replacing the value of `root`, since it may differ case to case.
+IMPORTANT: Make sure to avoid replacing the value of `root`, since it may differ from case to case.
 
 Once done these steps, you should be able to use the serial on the GPIO 13 and 14, which are mapped to the system file `/dev/serial0`.
 The latter (i.e., `/dev/serial0`) will be the name of the serial port to be used in Python.
+
+=== Clone the repository
+
+At this point, this repository can be cloned into the Raspberry.
+You can clone it anywhere you like, for instance, in your `HOME`.
+
+[source, bash]
+----
+$ cd $HOME
+$ git clone https://github.com/corsinone/pi-thermal-printer.git
+----
 
 === System packages
 
@@ -76,34 +95,47 @@ Therefore, in a terminal, run `sudo apt update && sudo apt upgrade -y`.
 Then, lets install `git`, which may come handy. Thus, type `sudo apt install -y git`.
 Lastly, we need `python3` and the package `python3-serial`: the former will install the python interpreter, while the latter allows using any serial in python. So, we run `sudo apt install -y python3 python3-serial`.
 
-TIP: Otherwise, you can install all the necessary packages by running the shell script install_dependencies.sh, by typing
+Alternatively, you can do the same instructions above by simply running the shell script `install_dependencies.sh` in the directory `setup` of this 
+repository.
+Thus,
 
 [source, bash]
 ----
-sudo chmod +x install_dependencies.sh
-sudo ./install_dependencies.sh
+$ cd pi-thermal-printer/setup
+$ sudo chmod +x install_dependencies.sh
+$ sudo ./install_dependencies.sh
 ----
 
 Once done these steps, it should be possible to send and receive bytes over the serial by using a python script.
 
-== Test
+== Test of the configuration
 
-To test it, we can use `pyserial-miniterm`, which comes installed with `python3-serial`.
+To test the configuration done so far, we can use `pyserial-miniterm`, which comes installed with `python3-serial`.
 
 Therefore, in a terminal, type
 
 [source, bash]
 ----
-`pyserial-miniterm /dev/serial0 9600`
+$ pyserial-miniterm /dev/serial0 9600
 ----
 
 This should open a console, where we can type any character on the serial.
 By typing anything, the printer should start printing each typed character.
-If you press the key btn:[ENTER], it should escape to a new line.
+If you press the key btn:[<ENTER>], it should escape to a new line.
 
-Then, press `CTRL` + `]` to quit.
+Then, press the keys btn:[<CTRL>]+btn:[<]>] to quit.
 
-== Script
+== Python
 
 Now, thanks to `python3-serial`, we can create python scripts that open the serial `/dev/serial0` and send characters to it.
 Examples are provided in the directory `python` within this repository.
+
+To run any of those script, in the terminal, type:
+
+[source, bash]
+----
+$ cd pi-thermal-printer/python
+$ python3 <script_name>.py #for example, $ python3 print_eject_paper.py
+----
+
+This should run the script and send data over the serial.
