@@ -1,8 +1,11 @@
 import serial
 import datetime
 
-ser = serial.Serial(port='/dev/serial0', baudrate=9600)
+port = '/dev/serial0'
+baudrate = 9600
+
+ser = serial.Serial(port=port, baudrate=baudrate)
 
 now = datetime.datetime.now()
-ser.write(bytes(now.strftime("%d/%m/%Y | %H:%M:%S")+' | Fine\n', 'utf-8'))
-
+ser.write(bytes(f'{now.strftime("%d/%m/%Y | %H:%M:%S")} | Fine\n', 'utf-8'))
+ser.flush()
