@@ -1,4 +1,9 @@
 import serial
-ser = serial.Serial(port='/dev/serial0', baudrate=9600)
-ser.write(bytes('Hello World!\n', 'utf-8'))
 
+port = '/dev/serial0'
+baudrate = 9600
+
+ser = serial.Serial(port=port, baudrate=baudrate)
+
+ser.write(bytes('Hello World!\n', 'utf-8'))
+ser.flush()
