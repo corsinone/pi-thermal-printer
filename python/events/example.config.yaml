@@ -1,0 +1,36 @@
+events:
+  enabled: true
+  subscriptions:
+  - command: python /home/pi/pi-thermal-printer/python/events/server_ok.py
+    event: Startup
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/web_on.py
+    event: ClientOpened
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_start.py -f "{name}"
+    event: PrintStarted
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_pausa.py
+    event: PrintPaused
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_ripresa.py
+    event: PrintResumed
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_fallita.py
+    event: PrintFailed
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_ko.py
+    event: PrintCancelling
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_eliminata.py
+    event: PrintCancelled
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/web_off.py
+    event: ClientClosed
+    type: system
+  - command: python /home/pi/pi-thermal-printer/python/events/stampa_finita.py
+    event: PrintDone
+    type: system
+  - command: sudo shutdown -h 1
+    event: PrintDone
+    type: system
