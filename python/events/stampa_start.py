@@ -1,11 +1,19 @@
 import argparse
 import datetime
+import math
 import serial
+import time
 
 """parse input arguments"""
 parser = argparse.ArgumentParser(prog='Stampa Start')
 parser.add_argument('-f', help='filename', default='')
 args = parser.parse_args()
+
+"""log start time"""
+t = math.trunc(time.clock_gettime(time.CLOCK_REALTIME))
+with open(filename, 'w') as f:
+    f.write(f'inizio:{str(t)}\n')
+    f.close()
 
 """write to serial"""
 ser = serial.Serial(port='/dev/serial0', baudrate=9600)

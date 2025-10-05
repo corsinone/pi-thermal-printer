@@ -1,5 +1,13 @@
 import datetime
+import math
 import serial
+import time
+
+"""log pause time"""
+t = math.trunc(time.clock_gettime(time.CLOCK_REALTIME))
+with open(filename, 'a') as f:
+    f.write(f'pausa:{str(t)}\n')
+    f.close()
 
 """write to serial"""
 ser = serial.Serial(port='/dev/serial0', baudrate=9600)
