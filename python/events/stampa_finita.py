@@ -35,11 +35,13 @@ with open(filename, 'r') as f:
     """compute duration as days, hours, mins, secs"""
     result = math.modf(duration/60)
     secs = math.ceil(result[0]*60)
-    result = math.modf(int(result[1])/60)
-    mins = math.ceil(result[0])*60
-    result = math.modf(int(result[1])/24)
+    _mins = int(result[1]) # leftover mins
+    result = math.modf(_mins/60)
+    mins = math.ceil(result[0]*60)
+    _hours = int(result[1]) # leftover hours
+    result = math.modf(_hours/24)
     hours = math.ceil(result[0]*24)
-    days = int(result[1])
+    days = int(result[1]) # leftover days, no need to proceed further (months)
     f.close()
 
 """write to serial"""
