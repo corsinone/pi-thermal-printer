@@ -11,3 +11,4 @@ now = datetime.datetime.now()
 ser.write(bytes(now.strftime("%d/%m/%y %H:%M:%S")+' Inizio stampa\n', 'utf-8'))
 if args.f != '':
     ser.write(bytes('file: '+args.f+'\n', 'utf-8'))
+ser.flush()
