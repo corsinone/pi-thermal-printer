@@ -2,10 +2,12 @@ import argparse
 import datetime
 import serial
 
+"""parse input arguments"""
 parser = argparse.ArgumentParser(prog='Stampa Start')
 parser.add_argument('-f', help='filename', default='')
 args = parser.parse_args()
 
+"""write to serial"""
 ser = serial.Serial(port='/dev/serial0', baudrate=9600)
 now = datetime.datetime.now()
 ser.write(bytes(f'{now.strftime("%d/%m/%y %H:%M:%S")} Inizio stampa\n',
