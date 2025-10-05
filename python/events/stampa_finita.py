@@ -19,7 +19,7 @@ with open(filename, 'r') as f:
         if state==0 and result[0]=='inizio':
             duration -= int(result[1])
             state = 1
-        elif state==1 and
+        elif state==1 and \
                 (result[0]=='pausa' or result[0]=='ko' or result[0]=='fine'):
             duration += int(result[1])
             state = 2
