@@ -1,6 +1,8 @@
 import datetime
+import math
 import os
 import serial
+import time
 
 filename = f'{os.environ["HOME"]}/.ptp.logtime'
 
