@@ -1,6 +1,6 @@
 import argparse
-import serial
 import datetime
+import serial
 
 parser = argparse.ArgumentParser(prog='Stampa Start')
 parser.add_argument('-f', help='filename', default='')
