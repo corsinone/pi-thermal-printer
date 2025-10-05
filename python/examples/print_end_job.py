@@ -7,8 +7,6 @@ port = '/dev/serial0'
 baudrate = 9600
 filename = '.logtime'
 
-ser = serial.Serial(port=port, baudrate=baudrate)
-
 """log end time"""
 t = math.trunc(time.clock_gettime(time.CLOCK_REALTIME))
 with open(filename, 'a') as f:
@@ -43,6 +41,9 @@ with open(filename, 'r') as f:
     hours = math.ceil(result[0]*24)
     days = int(result[1])
     f.close()
+
+"""write to serial"""
+ser = serial.Serial(port=port, baudrate=baudrate)
 
 now = datetime.datetime.now()
 ser.write(bytes(f'{now.strftime("%d/%m/%Y | %H:%M:%S")} | Fine\n', 'utf-8'))
