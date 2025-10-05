@@ -1,7 +1,10 @@
 import datetime
 import math
+import os
 import serial
 import time
+
+filename = f'{os.environ["HOME"]}/.ptp.logtime'
 
 """log pause time"""
 t = math.trunc(time.clock_gettime(time.CLOCK_REALTIME))

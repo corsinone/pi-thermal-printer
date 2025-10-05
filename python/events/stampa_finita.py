@@ -1,5 +1,8 @@
 import datetime
+import os
 import serial
+
+filename = f'{os.environ["HOME"]}/.ptp.logtime'
 
 """log end time"""
 t = math.trunc(time.clock_gettime(time.CLOCK_REALTIME))

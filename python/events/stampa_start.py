@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import math
+import os
 import serial
 import time
 
@@ -8,6 +9,8 @@ import time
 parser = argparse.ArgumentParser(prog='Stampa Start')
 parser.add_argument('-f', help='filename', default='')
 args = parser.parse_args()
+
+filename = f'{os.environ["HOME"]}/.ptp.logtime'
 
 """log start time"""
 t = math.trunc(time.clock_gettime(time.CLOCK_REALTIME))
