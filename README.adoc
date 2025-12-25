@@ -1,7 +1,10 @@
 = Thermal printer
 :author: Gianluca Corsini
 :date: Dec. 25 2024
-:toc: preamble
+:toc: right
+:imagesdir: ./doc/images/
+// this is necessary for enabling menu macros
+:experimental:
 
 == Introduction
 
@@ -9,8 +12,10 @@ This repository contains instructions on how to use a thermal printer connected 
 
 == Repository content
 
-boot:: Contains some configuration files that are stored in the Raspberry within either the directory `/boot/firmware` or `/boot`. Here, they are provided as backup (and the related files are denoted by the extension `.bkp`) or as example.
-python:: Contains examples of Python scripts to send characters to the thermal printer.
+boot:: Contains configuration files that are stored in the Raspberry within either the directory `/boot/firmware` or `/boot`. All the files are provided as examples; those with the extension `.bkp` are examples of backups.
+doc:: Contains the material used to write the documentation, e.g., the images. +
+At the moment of writing, the entry point for the documentation is the `README` file at the root of the repository.
+python:: Contains examples of Python scripts which send characters to the thermal printer over the serial port.
 setup:: Contains setup material, such as configuration scripts.
 
 == Setup
@@ -31,44 +36,61 @@ TIP: On Windows, you can use link:https://www.putty.org/[PuTTY] to connect throu
 Once logged in, open a terminal and follow these steps.
 
 * Type `sudo raspi-config`
-* Then go to `Interface Options` and press the key btn:[ENTER] on your keyboard.
-** Then to `Serial Port`.
-** The message `Would you like a login shell to be accessible over serial?` should appear.
-** Move the cursors on the button btn:[<No>] with the arrow keys of your keyboard, and press the key btn:[ENTER]. 
-** Next, at the question `Would you like the serial port hardware to be enabled?` confirm on the button btn:[<Yes>].
-** Now, you should get the following message:
-
-====
+* Select `Interface Options` and press the key btn:[ENTER] on your keyboard.
+* Select the option `Serial Port`.i
+* The message `Would you like a login shell to be accessible over serial?` should appear.
+* Move the cursors on the button btn:[<No>] with the arrow keys of your keyboard, and press the key btn:[ENTER].
+* Next, at the question `Would you like the serial port hardware to be enabled?` confirm on the button btn:[<Yes>].
+* Now, you should get the following message:
++
+----
  The serial login shell is disabled
  The serial interface is enabled
-====
-
-** Press on the button btn:[<Ok>].
-** Lastly, at the question whether to reboot or not the device, confirm with the button btn:[<Yes>].
-* Wait for the Raspberry to reboot, then log in back through SSH (in the meantime you should have logged out).
-* Navigate to the directory `/boot/firmware` if Raspbian, otherwise, if Octoprint `/boot`. To do that, simply type
-
-[source, bash]
 ----
-$ cd /boot/firmware # if Raspbian. Otherwise, in Octoprint, type $ cd /boot
+* Press on the button btn:[<Ok>].
+* Lastly, at the question whether to reboot or not the device, confirm with the button btn:[<Yes>].
+* Wait for the Raspberry to reboot, then log in back through SSH (in the meantime you should have logged out).
+
+Next:
+
+* Navigate to the directory `/boot/firmware` if you are using `Raspbian` as OS. Otherwise, if you are using `Octoprint` as OS, move to the directory `/boot`. +
+In order to do that, simply type
++
+[source,shell]
+----
+$ dest_dir=/boot/firmware # if Raspbian, else if Octoprint use '/boot'
+$ cd $dest_dir
 ----
 
 * Locate the files `cmdline.txt` and `config.txt` by typing `ls *.txt`.
 * Create a backup for those files by simply typing the following commands:
 
-[source, bash]
+[source,shell]
 ----
-$ sudo cp /boot/cmdline.txt /boot/cmdline.txt.bkp
-$ sudo cp /boot/config.txt /boot/config.txt.bkp
+$ sudo cp ${dest_dir}/cmdline.txt ${dest_dir}/cmdline.txt.bkp
+$ sudo cp ${dest_dir}/config.txt ${dest_dir}/config.txt.bkp
 ----
 
-* Make sure that `enable_uart=1` is uncommented in `config.txt`. To check that, you can type: `cat config.txt | grep uart`. To be uncommented, the line should start with the character `#`.
-** If this is not the case, you need to modify that line. 
-*** To do that, type `nano config.txt`.
-*** Navigate to that line with the arrow keys and add the character `#` at its beginning.
+* First, make sure that `enable_uart=1` is uncommented in `config.txt`.
+** To check that, you can type: `cat config.txt | grep uart`. +
+If uncommented, the line should *NOT* start with the character `#`.
+** If this is not the case, you need to modify that line manually.
+*** If that is the case, you can type `nano config.txt`.
+*** Navigate to that line with the arrow keys and remove the character `#` at its beginning.
 *** Press the keys btn:[<CTRL>]+btn:[<X>] on your keyboard and press btn:[<ENTER>].
-* Then, edit the file `cmdline.txt` by replacing the following line
-`console=serial0,115200 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait` with `dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles` +
+* Then, edit the file `cmdline.txt` by replacing the line +
++
+[source]
+----
+console=serial0,115200 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait
+----
++
+with this other line+
++
+[source]
+----
+dwc_otg.lpm_enable=0 console=tty1 root=PARTUUID=6a216d26-02 rootfstype=ext4 fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles
+----
 
 IMPORTANT: Make sure to avoid replacing the value of `root`, since it may differ from case to case.
 
@@ -125,6 +147,8 @@ If you press the key btn:[<ENTER>], it should escape to a new line.
 
 Then, press the keys btn:[<CTRL>]+btn:[<]>] to quit.
 
+IMPORTANT: In case of issues, please consult the Section <<_known_issues>>.
+
 == Python
 
 Now, thanks to `python3-serial`, we can create python scripts that open the serial `/dev/serial0` and send characters to it.
@@ -139,3 +163,27 @@ $ python3 <script_name>.py #for example, $ python3 print_eject_paper.py
 ----
 
 This should run the script and send data over the serial.
+
+== Known issues
+
+=== Error when connecting to /dev/serial0
+
+If the following error occurs:
+
+[source]
+----
+could not open port '/dev/serial0': [Errno 11] Could not exclusively lock port /dev/serial0: [Errno 11] Resource temporarily unavailable
+----
+
+Make sure to check the configuration of Octoprint, if it is running.
+
+* Open the browser and navigate to the IP of the Octoprint web server (i.e., the same IP of your raspberry).
+* Once landed into the home, click on the `Connection` panel to expand it, as shown in the image below.
+
+image::octoprint_home.png[Octoprint Homepage]
+
+* Make sure that the value of `Serial Port` is not in `AUTO` but set to the correct serial port which the *controller of the 3D printer* is connected to. +
+In the case of the image below, it is `/dev/ttyACM0`. +
+Then, click on the button btn:[Connect]. Once the controller is connected, the button should change to btn:[Disconnect], as shown in the image below.
+
+image::octoprint_connection.png["Octoprint Homepage > Connection panel"]
